@@ -18,7 +18,7 @@ export default function Home() {
       const userStatus = localStorage.getItem('mindaride_user_status')
       if (userStatus === 'authenticated' || userStatus === 'guest') {
         setIsLoading(false)
-        router.push('/home')
+        router.push('/') // Route to main shell page
       } else {
         setIsLoading(false)
       }
@@ -33,12 +33,12 @@ export default function Home() {
 
   const handleSignIn = () => {
     localStorage.setItem('mindaride_user_status', 'authenticated')
-    router.push('/home')
+    router.push('/') // Route to main shell page
   }
 
   const handleGuest = () => {
     localStorage.setItem('mindaride_user_status', 'guest')
-    router.push('/home')
+    router.push('/') // Route to main shell page
   }
 
   if (isLoading) {
