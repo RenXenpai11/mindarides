@@ -4,8 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import HomeDesktopContent from '@/components/home/HomeDesktopContent'
 import HomeMobileContent from '@/components/home/HomeMobileContent'
-import HomeSidebar from '@/components/home/HomeSidebar'
-import Sidebar from '@/components/layout/Sidebar'
 import { busCompanies, featuredStats, routes } from '@/lib/data'
 
 export default function HomePage() {
@@ -36,45 +34,27 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-[calc(100dvh-52px)] md:flex">
-      <Sidebar
-        title="Plan your trip"
-        description="Search terminals, routes, and schedules"
-      >
-        <HomeSidebar
-          from={from}
-          to={to}
-          onFromChange={setFrom}
-          onToChange={setTo}
-          onSearch={handleSearch}
-          onPickRoute={handlePickRoute}
-          popularRoutes={popularRoutes}
-          companies={busCompanies.slice(0, 4)}
-        />
-      </Sidebar>
+    <main className="min-h-[calc(100dvh-52px)]">
+      <HomeDesktopContent
+        from={from}
+        to={to}
+        onFromChange={setFrom}
+        onToChange={setTo}
+        onSearch={handleSearch}
+        stats={featuredStats}
+        routes={routes}
+        companies={busCompanies}
+      />
 
-      <div className="min-w-0 flex-1">
-        <HomeDesktopContent
-          from={from}
-          to={to}
-          onFromChange={setFrom}
-          onToChange={setTo}
-          onSearch={handleSearch}
-          stats={featuredStats}
-          routes={routes}
-          companies={busCompanies}
-        />
-
-        <HomeMobileContent
-          from={from}
-          to={to}
-          onFromChange={setFrom}
-          onToChange={setTo}
-          onSearch={handleSearch}
-          routes={routes}
-          onPickRoute={handlePickRoute}
-        />
-      </div>
+      <HomeMobileContent
+        from={from}
+        to={to}
+        onFromChange={setFrom}
+        onToChange={setTo}
+        onSearch={handleSearch}
+        routes={routes}
+        onPickRoute={handlePickRoute}
+      />
     </main>
   )
 }
