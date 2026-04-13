@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MapPin,
@@ -39,29 +39,37 @@ const quickStats = [
 ]
 
 const routeCards = [
-  { from: 'Davao City', to: 'Surigao City', duration: '6h 30m', fare: 'P400-P680', buses: 3, distance: '312 km' },
-  { from: 'Davao City', to: 'Cagayan de Oro', duration: '7h 00m', fare: 'P580-P750', buses: 2, distance: '342 km' },
-  { from: 'Davao City', to: 'General Santos', duration: '3h 00m', fare: 'P180-P230', buses: 4, distance: '122 km' },
+  { from: 'Davao City', to: 'Tagum City', duration: '1h 30m', fare: 'P110-P180', buses: 2, distance: '56 km' },
+  { from: 'Davao City', to: 'Surigao City', duration: '9h 30m', fare: 'P620-P860', buses: 3, distance: '471 km' },
+  { from: 'Davao City', to: 'Cagayan de Oro', duration: '7h 30m', fare: 'P480-P690', buses: 3, distance: '393 km' },
   { from: 'Davao City', to: 'Butuan City', duration: '5h 00m', fare: 'P390-P480', buses: 2, distance: '237 km' },
   { from: 'Davao City', to: 'Cotabato City', duration: '5h 00m', fare: 'P350-P420', buses: 3, distance: '196 km' },
-  { from: 'CDO', to: 'Iligan City', duration: '1h 30m', fare: 'P90-P120', buses: 5, distance: '58 km' },
+  { from: 'CDO', to: 'Iligan City', duration: '1h 30m', fare: 'P90-P120', buses: 1, distance: '92 km' },
 ]
 
 const busCompanies: BusCompany[] = [
-  { id: 'cl', name: 'Ceres Liner', logo: 'CL', color: '#1a6b3c', routes: 12, types: ['aircon', 'ordinary'], cities: ['Davao', 'CDO', 'Surigao'] },
-  { id: 'be', name: 'Bachelor Express', logo: 'BE', color: '#c62828', routes: 8, types: ['aircon', 'premium'], cities: ['Davao', 'CDO', 'GenSan'] },
-  { id: 'rtm', name: 'Rural Transit Mindanao', logo: 'RTM', color: '#1565c0', routes: 10, types: ['ordinary', 'aircon'], cities: ['Davao', 'Surigao', 'Butuan'] },
-  { id: 'dms', name: 'Davao Metro Shuttle', logo: 'DMS', color: '#7b1fa2', routes: 6, types: ['aircon'], cities: ['Davao', 'Tagum', 'Mati'] },
-  { id: 'ms', name: 'Mindanao Star', logo: 'MS', color: '#e65100', routes: 7, types: ['aircon', 'premium'], cities: ['Davao', 'CDO', 'Iligan'] },
-  { id: 've', name: 'Valley Express', logo: 'VE', color: '#2e7d32', routes: 5, types: ['ordinary', 'aircon'], cities: ['Davao', 'GenSan', 'Cotabato'] },
+  { id: 'cl', name: 'Ceres Liner', logo: 'CL', color: '#1a6b3c', routes: 12, types: ['aircon', 'ordinary'], cities: ['Davao City', 'CDO', 'Surigao City'] },
+  { id: 'be', name: 'Bachelor Express', logo: 'BE', color: '#c62828', routes: 8, types: ['aircon', 'premium'], cities: ['Davao City', 'CDO', 'General Santos'] },
+  { id: 'rtm', name: 'Rural Transit Mindanao', logo: 'RTM', color: '#1565c0', routes: 10, types: ['ordinary', 'aircon'], cities: ['Davao City', 'Surigao City', 'Butuan City'] },
+  { id: 'dms', name: 'Davao Metro Shuttle', logo: 'DMS', color: '#7b1fa2', routes: 6, types: ['aircon'], cities: ['Davao City', 'Tagum City', 'Mati City'] },
+  { id: 'ms', name: 'Mindanao Star', logo: 'MS', color: '#e65100', routes: 7, types: ['aircon', 'premium'], cities: ['Davao City', 'CDO', 'Iligan City'] },
+  { id: 've', name: 'Valley Express', logo: 'VE', color: '#2e7d32', routes: 5, types: ['ordinary', 'aircon'], cities: ['Davao City', 'General Santos', 'Cotabato City'] },
 ]
 
+// Collect unique city names for autocomplete
+const allCities = Array.from(
+  new Set(
+    busCompanies.flatMap((c) => c.cities)
+      .concat(routeCards.flatMap((r) => [r.from, r.to]))
+  )
+).sort()
+
 const popularRoutes: PopularRoute[] = [
-  { id: '1', from: 'Davao', to: 'Surigao City' },
-  { id: '2', from: 'Davao', to: 'Cagayan de Oro' },
-  { id: '3', from: 'Davao', to: 'General Santos' },
-  { id: '4', from: 'Davao', to: 'Butuan' },
-  { id: '5', from: 'Davao', to: 'Cotabato' },
+  { id: '1', from: 'Davao', to: 'Tagum City' },
+  { id: '2', from: 'Davao', to: 'Surigao City' },
+  { id: '3', from: 'Davao', to: 'Cagayan de Oro' },
+  { id: '4', from: 'Davao', to: 'Cotabato' },
+  { id: '5', from: 'Davao', to: 'Butuan' },
   { id: '6', from: 'CDO', to: 'Iligan' },
 ]
 
@@ -79,14 +87,30 @@ function BusTypeBadge({ type }: { type: BusType }) {
   )
 }
 
+
 export default function Page() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  const [fromFocus, setFromFocus] = useState(false)
+  const [toFocus, setToFocus] = useState(false)
+  const [fromHover, setFromHover] = useState(false)
+  const [toHover, setToHover] = useState(false)
   const router = useRouter()
+
+  const fromInputRef = useRef<HTMLInputElement>(null)
+  const toInputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = () => {
     router.push(`/plan?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
   }
+
+  // Filtered suggestions
+  const fromSuggestions = from.length > 0
+    ? allCities.filter((city) => city.toLowerCase().includes(from.toLowerCase()) && city.toLowerCase() !== from.toLowerCase())
+    : []
+  const toSuggestions = to.length > 0
+    ? allCities.filter((city) => city.toLowerCase().includes(to.toLowerCase()) && city.toLowerCase() !== to.toLowerCase())
+    : []
 
   return (
     <>
@@ -105,26 +129,76 @@ export default function Page() {
               Plan your Mindanao bus trip across 30+ cities
             </p>
 
-            <div className="bg-white border border-[#e0e0dc] rounded-xl shadow-sm p-3 flex items-center gap-3">
-              <div className="flex items-center gap-2 flex-1 border-r border-[#e0e0dc] pr-3">
+            <div className="bg-white border border-[#e0e0dc] rounded-xl shadow-sm p-3 flex items-center gap-3 relative">
+              <div className="flex items-center gap-2 flex-1 border-r border-[#e0e0dc] pr-3 relative">
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[#1a6b3c]" />
                 <input
+                  ref={fromInputRef}
                   type="text"
                   placeholder="From city"
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
+                  onFocus={() => setFromFocus(true)}
+                  onBlur={() => setTimeout(() => setFromFocus(false), 100)}
                   className="flex-1 text-sm outline-none placeholder-gray-400"
+                  autoComplete="off"
                 />
+                {(fromFocus || fromHover) && fromSuggestions.length > 0 && (
+                  <ul
+                    className="absolute left-0 top-9 z-20 w-full rounded-b-xl border border-t-0 border-[#e0e0dc] bg-white shadow-lg max-h-40 overflow-y-auto"
+                    onMouseEnter={() => setFromHover(true)}
+                    onMouseLeave={() => setFromHover(false)}
+                  >
+                    {fromSuggestions.map((city) => (
+                      <li
+                        key={city}
+                        className="px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-[#e8f5ee]"
+                        onMouseDown={() => {
+                          setFrom(city)
+                          setFromFocus(false)
+                          setTimeout(() => fromInputRef.current?.blur(), 0)
+                        }}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <div className="flex items-center gap-2 flex-1 pr-3">
+              <div className="flex items-center gap-2 flex-1 pr-3 relative">
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[#e24b4a]" />
                 <input
+                  ref={toInputRef}
                   type="text"
                   placeholder="To city"
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
+                  onFocus={() => setToFocus(true)}
+                  onBlur={() => setTimeout(() => setToFocus(false), 100)}
                   className="flex-1 text-sm outline-none placeholder-gray-400"
+                  autoComplete="off"
                 />
+                {(toFocus || toHover) && toSuggestions.length > 0 && (
+                  <ul
+                    className="absolute left-0 top-9 z-20 w-full rounded-b-xl border border-t-0 border-[#e0e0dc] bg-white shadow-lg max-h-40 overflow-y-auto"
+                    onMouseEnter={() => setToHover(true)}
+                    onMouseLeave={() => setToHover(false)}
+                  >
+                    {toSuggestions.map((city) => (
+                      <li
+                        key={city}
+                        className="px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-[#fdeaea]"
+                        onMouseDown={() => {
+                          setTo(city)
+                          setToFocus(false)
+                          setTimeout(() => toInputRef.current?.blur(), 0)
+                        }}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <button
                 onClick={handleSearch}
@@ -261,26 +335,76 @@ export default function Page() {
         <div className="px-4 -mt-10">
           <div className="bg-white border border-[#e0e0dc] rounded-xl shadow-sm p-4">
             <div className="relative mb-3">
-              <div className="flex items-center gap-3 p-3 border border-[#e0e0dc] rounded-lg mb-1">
+              <div className="flex items-center gap-3 p-3 border border-[#e0e0dc] rounded-lg mb-1 relative">
                 <div className="w-3 h-3 rounded-full flex-shrink-0 bg-[#1a6b3c]" />
                 <input
+                  ref={fromInputRef}
                   type="text"
                   placeholder="From - Origin city"
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
+                  onFocus={() => setFromFocus(true)}
+                  onBlur={() => setTimeout(() => setFromFocus(false), 100)}
                   className="flex-1 text-sm outline-none placeholder-gray-400"
+                  autoComplete="off"
                 />
+                {(fromFocus || fromHover) && fromSuggestions.length > 0 && (
+                  <ul
+                    className="absolute left-0 top-11 z-20 w-full rounded-b-xl border border-t-0 border-[#e0e0dc] bg-white shadow-lg max-h-40 overflow-y-auto"
+                    onMouseEnter={() => setFromHover(true)}
+                    onMouseLeave={() => setFromHover(false)}
+                  >
+                    {fromSuggestions.map((city) => (
+                      <li
+                        key={city}
+                        className="px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-[#e8f5ee]"
+                        onMouseDown={() => {
+                          setFrom(city)
+                          setFromFocus(false)
+                          setTimeout(() => fromInputRef.current?.blur(), 0)
+                        }}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div className="absolute left-[22px] top-[46px] w-0.5 h-4 bg-gray-200 z-10" />
-              <div className="flex items-center gap-3 p-3 border border-[#e0e0dc] rounded-lg mt-1">
+              <div className="flex items-center gap-3 p-3 border border-[#e0e0dc] rounded-lg mt-1 relative">
                 <div className="w-3 h-3 rounded-full flex-shrink-0 bg-[#e24b4a]" />
                 <input
+                  ref={toInputRef}
                   type="text"
                   placeholder="To - Destination city"
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
+                  onFocus={() => setToFocus(true)}
+                  onBlur={() => setTimeout(() => setToFocus(false), 100)}
                   className="flex-1 text-sm outline-none placeholder-gray-400"
+                  autoComplete="off"
                 />
+                {(toFocus || toHover) && toSuggestions.length > 0 && (
+                  <ul
+                    className="absolute left-0 top-11 z-20 w-full rounded-b-xl border border-t-0 border-[#e0e0dc] bg-white shadow-lg max-h-40 overflow-y-auto"
+                    onMouseEnter={() => setToHover(true)}
+                    onMouseLeave={() => setToHover(false)}
+                  >
+                    {toSuggestions.map((city) => (
+                      <li
+                        key={city}
+                        className="px-3 py-2 text-sm text-gray-700 cursor-pointer hover:bg-[#fdeaea]"
+                        onMouseDown={() => {
+                          setTo(city)
+                          setToFocus(false)
+                          setTimeout(() => toInputRef.current?.blur(), 0)
+                        }}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
             <button

@@ -40,7 +40,7 @@ export const terminals: Terminal[] = [
     lat: 7.4478,
     lng: 125.8078,
     type: 'regional',
-    routes: ['davao-surigao', 'davao-butuan'],
+    routes: ['davao-surigao', 'davao-butuan', 'davao-tagum'],
   },
   {
     id: 'butuan-terminal',
@@ -144,8 +144,8 @@ export const terminals: Terminal[] = [
 ]
 
 export const busCompanies: BusCompany[] = [
-  { id: 'dltb', name: 'DLTB Mindanao', code: 'DLTB', color: '#1a6b3c', routes: ['davao-surigao', 'davao-butuan'], types: ['aircon', 'premium'] },
-  { id: 'bachelor', name: 'Bachelor Express', code: 'BEX', color: '#ef9f27', routes: ['davao-surigao', 'davao-cdo'], types: ['aircon', 'ordinary'] },
+  { id: 'dltb', name: 'DLTB Mindanao', code: 'DLTB', color: '#1a6b3c', routes: ['davao-surigao', 'davao-butuan', 'davao-tagum'], types: ['aircon', 'premium'] },
+  { id: 'bachelor', name: 'Bachelor Express', code: 'BEX', color: '#ef9f27', routes: ['davao-surigao', 'davao-cdo', 'davao-tagum'], types: ['aircon', 'ordinary'] },
   { id: 'rural', name: 'Rural Transit', code: 'RTC', color: '#2f855a', routes: ['davao-cotabato', 'gensan-koronadal'], types: ['aircon', 'ordinary', 'premium'] },
   { id: 'yellow', name: 'Yellow Bus Line', code: 'YBL', color: '#ca8a04', routes: ['davao-cotabato', 'gensan-koronadal'], types: ['aircon', 'ordinary'] },
   { id: 'mindanao-star', name: 'Mindanao Star', code: 'MDS', color: '#166534', routes: ['davao-cdo', 'cdo-iligan'], types: ['aircon', 'premium'] },
@@ -156,6 +156,7 @@ export const busCompanies: BusCompany[] = [
 
 export const routes: Route[] = [
   { id: 'davao-surigao', from: 'Davao City', to: 'Surigao City', distance_km: 471, duration_hrs: 9.5, companies: ['dltb', 'bachelor', 'goldline'] },
+  { id: 'davao-tagum', from: 'Davao City', to: 'Tagum City', distance_km: 56, duration_hrs: 1.5, companies: ['dltb', 'bachelor'] },
   { id: 'davao-cdo', from: 'Davao City', to: 'Cagayan de Oro', distance_km: 393, duration_hrs: 7.5, companies: ['bachelor', 'mindanao-star', 'goldline'] },
   { id: 'davao-cotabato', from: 'Davao City', to: 'Cotabato City', distance_km: 253, duration_hrs: 5, companies: ['rural', 'yellow'] },
   { id: 'davao-butuan', from: 'Davao City', to: 'Butuan City', distance_km: 317, duration_hrs: 6.5, companies: ['dltb'] },
@@ -168,25 +169,119 @@ export const routes: Route[] = [
 export const schedules: Schedule[] = [
   { id: 'sch-001', route_id: 'davao-surigao', company_id: 'dltb', departure_time: '05:30', arrival_time: '15:00', fare_min: 620, fare_max: 780, bus_type: 'aircon', days: ['Daily'] },
   { id: 'sch-002', route_id: 'davao-surigao', company_id: 'goldline', departure_time: '21:00', arrival_time: '06:30', fare_min: 710, fare_max: 860, bus_type: 'premium', days: ['Mon', 'Wed', 'Fri', 'Sun'] },
+  { id: 'sch-009', route_id: 'davao-tagum', company_id: 'dltb', departure_time: '06:00', arrival_time: '07:30', fare_min: 130, fare_max: 180, bus_type: 'aircon', days: ['Daily'] },
+  { id: 'sch-010', route_id: 'davao-tagum', company_id: 'bachelor', departure_time: '08:00', arrival_time: '09:40', fare_min: 110, fare_max: 160, bus_type: 'ordinary', days: ['Daily'] },
   { id: 'sch-003', route_id: 'davao-cdo', company_id: 'mindanao-star', departure_time: '06:00', arrival_time: '13:30', fare_min: 540, fare_max: 690, bus_type: 'premium', days: ['Daily'] },
   { id: 'sch-004', route_id: 'davao-cdo', company_id: 'bachelor', departure_time: '10:30', arrival_time: '18:00', fare_min: 480, fare_max: 620, bus_type: 'aircon', days: ['Daily'] },
   { id: 'sch-005', route_id: 'davao-cotabato', company_id: 'rural', departure_time: '07:00', arrival_time: '12:00', fare_min: 340, fare_max: 420, bus_type: 'ordinary', days: ['Daily'] },
   { id: 'sch-006', route_id: 'davao-cotabato', company_id: 'yellow', departure_time: '16:00', arrival_time: '20:45', fare_min: 390, fare_max: 470, bus_type: 'aircon', days: ['Daily'] },
+  { id: 'sch-011', route_id: 'davao-butuan', company_id: 'dltb', departure_time: '09:00', arrival_time: '15:30', fare_min: 390, fare_max: 480, bus_type: 'aircon', days: ['Daily'] },
   { id: 'sch-007', route_id: 'butuan-surigao', company_id: 'weesam', departure_time: '08:15', arrival_time: '10:45', fare_min: 220, fare_max: 280, bus_type: 'aircon', days: ['Daily'] },
+  { id: 'sch-012', route_id: 'cdo-iligan', company_id: 'mindanao-star', departure_time: '06:30', arrival_time: '08:00', fare_min: 90, fare_max: 120, bus_type: 'aircon', days: ['Daily'] },
   { id: 'sch-008', route_id: 'zamboanga-pagadian', company_id: 'metro', departure_time: '05:00', arrival_time: '09:00', fare_min: 290, fare_max: 360, bus_type: 'premium', days: ['Tue', 'Thu', 'Sat'] },
 ]
 
-export const plannerRoute: PlannerRoute = {
-  ...routes[0],
-  fare_min: 620,
-  fare_max: 860,
-  stopovers: [
-    { id: 'stop-davao', name: 'Davao City', lat: 7.0647, lng: 125.5988 },
-    { id: 'stop-tagum', name: 'Tagum City', lat: 7.4478, lng: 125.8078 },
-    { id: 'stop-butuan', name: 'Butuan City', lat: 8.9492, lng: 125.5436 },
-    { id: 'stop-surigao', name: 'Surigao City', lat: 9.7846, lng: 125.4888 },
-  ],
+const routeStopoversById: Record<string, string[]> = {
+  'davao-surigao': ['davao-ecoland', 'tagum-city', 'butuan-terminal', 'surigao-terminal'],
+  'davao-tagum': ['davao-ecoland', 'tagum-city'],
+  'davao-cdo': ['davao-ecoland', 'tagum-city', 'butuan-terminal', 'cdo-agora'],
+  'davao-cotabato': ['davao-ecoland', 'cotabato-terminal'],
+  'davao-butuan': ['davao-ecoland', 'tagum-city', 'butuan-terminal'],
+  'butuan-surigao': ['butuan-terminal', 'surigao-terminal'],
+  'cdo-iligan': ['cdo-agora', 'iligan-terminal'],
+  'gensan-koronadal': ['gensan-terminal', 'koronadal-terminal'],
+  'zamboanga-pagadian': ['zamboanga-terminal', 'pagadian-terminal'],
 }
+
+const cityAliases: Record<string, string> = {
+  davao: 'davao city',
+  tagum: 'tagum city',
+  butuan: 'butuan city',
+  surigao: 'surigao city',
+  cdo: 'cagayan de oro',
+  cagayan: 'cagayan de oro',
+  iligan: 'iligan city',
+  gensan: 'general santos',
+  cotabato: 'cotabato city',
+}
+
+function normalizeCityName(value: string) {
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, ' ')
+  return cityAliases[normalized] ?? normalized
+}
+
+function toPlannerStopovers(route: Route) {
+  const terminalById = new Map(terminals.map((terminal) => [terminal.id, terminal]))
+  const mappedTerminalIds = routeStopoversById[route.id] ?? []
+
+  const mappedStops = mappedTerminalIds
+    .map((terminalId) => terminalById.get(terminalId))
+    .filter((terminal): terminal is Terminal => Boolean(terminal))
+    .map((terminal) => ({
+      id: terminal.id,
+      name: terminal.city,
+      lat: terminal.lat,
+      lng: terminal.lng,
+    }))
+
+  if (mappedStops.length >= 2) {
+    return mappedStops
+  }
+
+  const fallbackStops = terminals
+    .filter((terminal) => {
+      const city = normalizeCityName(terminal.city)
+      return city === normalizeCityName(route.from) || city === normalizeCityName(route.to)
+    })
+    .map((terminal) => ({
+      id: terminal.id,
+      name: terminal.city,
+      lat: terminal.lat,
+      lng: terminal.lng,
+    }))
+
+  return fallbackStops.length >= 2
+    ? fallbackStops
+    : [
+        { id: 'stop-from', name: route.from, lat: 7.0647, lng: 125.5988 },
+        { id: 'stop-to', name: route.to, lat: 7.4478, lng: 125.8078 },
+      ]
+}
+
+export function getPlannerRouteById(routeId: string) {
+  const route = routes.find((item) => item.id === routeId)
+
+  if (!route) {
+    return null
+  }
+
+  const fareRange = getFareRange(route.id)
+
+  return {
+    ...route,
+    fare_min: fareRange.min,
+    fare_max: fareRange.max,
+    stopovers: toPlannerStopovers(route),
+  }
+}
+
+export function getPlannerRouteByCities(from?: string, to?: string) {
+  if (!from || !to) {
+    return null
+  }
+
+  const normalizedFrom = normalizeCityName(from)
+  const normalizedTo = normalizeCityName(to)
+  const match = routes.find(
+    (route) =>
+      normalizeCityName(route.from) === normalizedFrom &&
+      normalizeCityName(route.to) === normalizedTo
+  )
+
+  return match ? getPlannerRouteById(match.id) : null
+}
+
+export const plannerRoute: PlannerRoute = getPlannerRouteById('davao-surigao') as PlannerRoute
 
 export const featuredStats = [
   { label: 'Routes tracked', value: '24' },
