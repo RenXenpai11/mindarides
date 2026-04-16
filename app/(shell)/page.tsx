@@ -101,7 +101,14 @@ export default function Page() {
   const toInputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = () => {
-    router.push(`/plan?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
+    const fromValue = from.trim()
+    const toValue = to.trim()
+
+    if (!fromValue || !toValue) {
+      return
+    }
+
+    router.push(`/plan?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}`)
   }
 
   // Filtered suggestions
