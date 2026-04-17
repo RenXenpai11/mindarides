@@ -28,32 +28,38 @@ function getStopIcon(isDestination: boolean) {
   })
 }
 
-export default function RouteMap({ route }: RouteMapProps) {
-
-  const positions = route.stopovers.map((stop) => [stop.lat, stop.lng] as [number, number])
   const [roadPath, setRoadPath] = useState<Array<[number, number]> | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Build OSRM coordinates string: lng,lat;lng,lat;...
+  const coords = route.stopovers.map((stop) => `${stop.lng},${stop.lat}`).join(';')
+
   useEffect(() => {
-    if (!route.stopovers || route.stopovers.length < 2) {
-      setRoadPath(null)
-      return
-    }
-    const coords = route.stopovers.map(s => `${s.lng},${s.lat}`).join(';')
-    setLoading(true)
-    fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates) {
-          // OSRM returns [lng, lat], Leaflet wants [lat, lng]
-          setRoadPath(data.routes[0].geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng]))
-        } else {
-          setRoadPath(null)
+    let ignore = false
+    async function fetchRoadPath() {
+      setLoading(true)
+      try {
+        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
+        const data = await res.json()
+        if (!ignore && data.routes && data.routes[0]) {
+          // OSRM returns [lng, lat], convert to [lat, lng]
+          const geo = data.routes[0].geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng])
+          setRoadPath(geo)
         }
-      })
-      .catch(() => setRoadPath(null))
-      .finally(() => setLoading(false))
-  }, [route.stopovers])
+      } catch (e) {
+        setRoadPath(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (route.stopovers.length > 1) fetchRoadPath()
+    else setRoadPath(null)
+    return () => { ignore = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coords])
+
+  // Fallback: straight lines between stopovers
+  const fallbackPositions = route.stopovers.map((stop) => [stop.lat, stop.lng] as [number, number])
 
   return (
     <MapContainer
@@ -61,14 +67,14 @@ export default function RouteMap({ route }: RouteMapProps) {
       className="h-full min-h-[360px] w-full rounded-[28px]"
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {/* Fallback dashed line while loading or if OSRM fails */}
+      {/* Show fallback dashed line while loading or if OSRM fails */}
       {(loading || !roadPath) && (
         <Polyline
-          positions={positions}
-          pathOptions={{ color: '#bdbdbd', weight: 5, dashArray: '8 8' }}
+          positions={fallbackPositions}
+          pathOptions={{ color: '#888', weight: 4, dashArray: '8 8' }}
         />
       )}
-      {/* Road-following route line from OSRM */}
+      {/* Show OSRM road path if loaded */}
       {roadPath && !loading && (
         <Polyline
           positions={roadPath}
@@ -77,7 +83,6 @@ export default function RouteMap({ route }: RouteMapProps) {
       )}
       {route.stopovers.map((stop, index) => {
         const isDestination = index === route.stopovers.length - 1
-
         return (
           <Marker
             key={stop.id}
