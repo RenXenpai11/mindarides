@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7f6;
+  --background: #f0f2f8;
   --foreground: #183427;
   --muted: #66746d;
   --card: #ffffff;
@@ -21,8 +21,12 @@
 }
 
 html {
-  background: var(--background);
   color: var(--foreground);
+}
+
+html.dark {
+  --background: #0d1117;
+  --foreground: #e6edf3;
 }
 
 body {
@@ -30,6 +34,7 @@ body {
   min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
+  transition: background 0.2s ease;
 }
 
 a {

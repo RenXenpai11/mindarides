@@ -8,7 +8,7 @@ export default function ShellLayout({
   children: ReactNode
 }) {
   return (
-    <div className="min-h-dvh bg-[#f5f7f6]">
+    <div className="min-h-dvh">
       <Navbar />
       <div className="pb-20 xl:pb-0 xl:pt-[52px]">{children}</div>
       <BottomNav />
